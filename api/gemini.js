@@ -12,26 +12,38 @@ export default async function handler(req, res) {
     if (typeof body === 'string') body = JSON.parse(body);
 
     const { mensagem } = body;
-    const key = process.env.GEMINI_KEY;
+    const key = process.env.GROQ_KEY;
 
-    if (!key) return res.status(500).json({ error: 'GEMINI_KEY não configurada' });
+    if (!key) return res.status(500).json({ error: 'GROQ_KEY não configurada' });
 
-    const response = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:generateContent?key=' + key,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: mensagem }] }]
-        })
-      }
-    );
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + key
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        messages: [
+          {
+            role: 'system',
+            content: 'Você é um assistente educacional do Painel Sala do Futuro. Ajude os alunos com dúvidas escolares, estudos e tarefas. Seja simpático, claro e objetivo. Responda sempre em português.'
+          },
+          {
+            role: 'user',
+            content: mensagem
+          }
+        ],
+        max_tokens: 1024,
+        temperature: 0.7
+      })
+    });
 
     const data = await response.json();
 
     if (data.error) return res.status(500).json({ error: data.error.message });
 
-    const texto = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const texto = data.choices?.[0]?.message?.content;
     if (!texto) return res.status(500).json({ error: 'Resposta vazia', raw: data });
 
     return res.status(200).json({ resposta: texto });
