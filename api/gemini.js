@@ -16,20 +16,20 @@ export default async function handler(req, res) {
 
     if (!key) return res.status(500).json({ error: 'GEMINI_KEY não configurada' });
 
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`;
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: mensagem }] }]
-      })
-    });
+    const response = await fetch(
+      'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=' + key,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: mensagem }] }]
+        })
+      }
+    );
 
     const data = await response.json();
-    console.log('Gemini response:', JSON.stringify(data));
 
-    if (data.error) return res.status(500).json({ error: data.error.message, details: data.error });
+    if (data.error) return res.status(500).json({ error: data.error.message });
 
     const texto = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!texto) return res.status(500).json({ error: 'Resposta vazia', raw: data });
