@@ -2,16 +2,10 @@
   "version": 2,
   "builds": [
     { "src": "api/usuarios.js", "use": "@vercel/node" },
-    { "src": "api/links.js", "use": "@vercel/node" },
-    { "src": "api/logs.js", "use": "@vercel/node" },
-    { "src": "api/avisos.js", "use": "@vercel/node" },
     { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/usuarios", "dest": "/api/usuarios.js" },
-    { "src": "/api/links", "dest": "/api/links.js" },
-    { "src": "/api/logs", "dest": "/api/logs.js" },
-    { "src": "/api/avisos", "dest": "/api/avisos.js" },
     { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
