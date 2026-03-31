@@ -2,10 +2,10 @@
   "version": 2,
   "builds": [
     { "src": "api/usuarios.js", "use": "@vercel/node" },
-    { "src": "public/index.html", "use": "@vercel/static" }
+    { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/usuarios", "dest": "/api/usuarios.js" },
-    { "src": "/(.*)", "dest": "/public/index.html" }
+    { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
