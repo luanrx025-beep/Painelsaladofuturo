@@ -16,7 +16,7 @@ export default async function handler(req, res) {
 
     if (!key) return res.status(500).json({ error: 'GEMINI_KEY não configurada' });
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`;
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`;
 
     const response = await fetch(url, {
       method: 'POST',
