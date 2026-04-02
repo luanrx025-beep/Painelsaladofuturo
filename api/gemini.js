@@ -11,10 +11,12 @@ export default async function handler(req, res) {
     let body = req.body;
     if (typeof body === 'string') body = JSON.parse(body);
 
-    const { mensagem } = body;
+    const { mensagem, sistema } = body;
     const key = process.env.GROQ_KEY;
 
     if (!key) return res.status(500).json({ error: 'GROQ_KEY não configurada' });
+
+    const systemPrompt = sistema || 'Você é um assistente educacional do Painel Sala do Futuro. Ajude os alunos com dúvidas escolares, estudos e tarefas. Seja simpático, claro e objetivo. Responda sempre em português.';
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -25,14 +27,8 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'llama-3.1-8b-instant',
         messages: [
-          {
-            role: 'system',
-            content: 'Você é um assistente educacional do Painel Sala do Futuro. Ajude os alunos com dúvidas escolares, estudos e tarefas. Seja simpático, claro e objetivo. Responda sempre em português.'
-          },
-          {
-            role: 'user',
-            content: mensagem
-          }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: mensagem }
         ],
         max_tokens: 1024,
         temperature: 0.7
@@ -40,7 +36,6 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-
     if (data.error) return res.status(500).json({ error: data.error.message });
 
     const texto = data.choices?.[0]?.message?.content;
