@@ -7,6 +7,7 @@
     { "src": "api/avisos.js", "use": "@vercel/node" },
     { "src": "api/gemini.js", "use": "@vercel/node" },
     { "src": "api/avaliacoes.js", "use": "@vercel/node" },
+    { "src": "api/fotos.js", "use": "@vercel/node" },
     { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
@@ -16,6 +17,7 @@
     { "src": "/api/avisos", "dest": "/api/avisos.js" },
     { "src": "/api/gemini", "dest": "/api/gemini.js" },
     { "src": "/api/avaliacoes", "dest": "/api/avaliacoes.js" },
+    { "src": "/api/fotos", "dest": "/api/fotos.js" },
     { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
