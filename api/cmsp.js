@@ -32,9 +32,10 @@ export default async function handler(req, res) {
       const r = await fetch(`${SED}/credenciais/api/LoginCompletoToken`, {
         method: 'POST',
         headers: HEADERS_BASE,
-        body: JSON.stringify({ user: ra, senha, senhaConfirmacao: senha })
+        body: JSON.stringify({ user: ra.toUpperCase(), senha })
       });
       const data = await safeJson(r);
+      console.log('SED status:', r.status, 'data:', JSON.stringify(data)?.slice(0, 300));
       if (!data || !r.ok) return res.status(401).json({ error: 'RA ou senha inválidos' });
       if (data.statusCode !== 200) return res.status(401).json({ error: 'RA ou senha inválidos' });
 
