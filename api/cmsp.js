@@ -15,6 +15,13 @@ export default async function handler(req, res) {
 
     const { acao, ra, senha, token, codigoAluno, userId } = body;
 
+    // Helper: parse JSON com segurança (evita crash se API retornar HTML)
+    async function safeJson(response) {
+      const text = await response.text();
+      try { return JSON.parse(text); }
+      catch { return null; }
+    }
+
     // ── LOGIN ──
     if (acao === 'login') {
       const r = await fetch(`${BASE}/registration/edusp`, {
@@ -22,7 +29,8 @@ export default async function handler(req, res) {
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Origin': 'https://crimsonzerohub.xyz' },
         body: JSON.stringify({ realm: 'edusp', platform: 'webclient', id: ra, password: senha })
       });
-      const data = await r.json();
+      const data = await safeJson(r);
+      if (!data) return res.status(502).json({ error: 'Serviço da SED indisponível no momento. Tente novamente.' });
       if (!r.ok || data.error) return res.status(401).json({ error: 'RA ou senha inválidos' });
       return res.status(200).json({
         token: data.auth_token,
@@ -40,17 +48,18 @@ export default async function handler(req, res) {
       const r = await fetch(`${BASE}/apiboletim/api/Frequencia/GetFaltasBimestreAtual?codigoAluno=${codigoAluno}`, {
         headers: { 'Accept': 'application/json', 'Origin': 'https://crimsonzerohub.xyz' }
       });
-      const data = await r.json();
+      const data = await safeJson(r);
+      if (!data) return res.status(502).json({ error: 'Serviço de faltas indisponível.' });
       return res.status(200).json(data);
     }
 
     // ── PENDÊNCIAS ──
     if (acao === 'pendencias') {
-      // Busca salas do aluno
       const roomsR = await fetch(`${BASE}/room/user?list_all=true&with_cards=true`, {
         headers: { 'x-api-key': token, 'Accept': 'application/json', 'Origin': 'https://crimsonzerohub.xyz' }
       });
-      const roomsData = await roomsR.json();
+      const roomsData = await safeJson(roomsR);
+      if (!roomsData) return res.status(502).json({ error: 'Serviço de salas indisponível.' });
       const rooms = roomsData?.rooms || [];
 
       const targets = new Set();
@@ -71,7 +80,8 @@ export default async function handler(req, res) {
       const pendR = await fetch(`${BASE}/pendencias?${params.toString()}`, {
         headers: { 'x-api-key': token, 'Accept': 'application/json', 'Origin': 'https://crimsonzerohub.xyz' }
       });
-      const pendData = await pendR.json();
+      const pendData = await safeJson(pendR);
+      if (!pendData) return res.status(502).json({ error: 'Serviço de pendências indisponível.' });
       const total = Array.isArray(pendData) ? pendData.reduce((s, i) => s + (i.count || 0), 0) : 0;
       return res.status(200).json({ total, lista: pendData });
     }
@@ -81,7 +91,8 @@ export default async function handler(req, res) {
       const r = await fetch(`${BASE}/cmspwebservice/api/sala-do-futuro-alunos/consulta-notificacao-cmsp?userId=${userId}`, {
         headers: { 'Accept': 'application/json', 'Origin': 'https://crimsonzerohub.xyz' }
       });
-      const data = await r.json();
+      const data = await safeJson(r);
+      if (!data) return res.status(502).json({ error: 'Serviço de notificações indisponível.' });
       return res.status(200).json(data);
     }
 
